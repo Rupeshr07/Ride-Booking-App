@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import '../utils/constants.dart';
  import '../utils/text_styles.dart';
 import '../widgets/custom_button.dart';
+import '../services/auth_service.dart';
 
 class OTPScreen extends StatefulWidget {
   const OTPScreen({Key? key}) : super(key: key);
@@ -75,34 +76,60 @@ class _OTPScreenState extends State<OTPScreen> {
       _errorText = null;
     });
 
-    print("Verifying OTP: $code");
-    await Future.delayed(const Duration(seconds: 2));
+    final String mobileNumber = ModalRoute.of(context)?.settings.arguments as String? ?? "";
 
-    if (mounted) {
-      setState(() {
-        _isLoading = false;
-      });
-
-      // Dummy verification
-      if (code == "123456") {
-        Navigator.pushReplacementNamed(context, '/registration');
-      } else {
+    try {
+      await AuthService.verifyOtp(mobileNumber, code);
+      if (mounted) {
         setState(() {
-          _errorText = "OTP not verified. Try 123456";
+          _isLoading = false;
+        });
+        Navigator.pushReplacementNamed(context, '/registration');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _errorText = e.toString();
         });
       }
     }
   }
 
-  void _resendOTP() {
+  void _resendOTP() async {
     if (_canResend) {
-      print("Resending OTP...");
-      _startTimer();
-      // Clear fields
-      for (var controller in _controllers) {
-        controller.clear();
+      final String mobileNumber = ModalRoute.of(context)?.settings.arguments as String? ?? "";
+      
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        await AuthService.sendOtp(mobileNumber);
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('OTP resent successfully')),
+          );
+          _startTimer();
+          // Clear fields
+          for (var controller in _controllers) {
+            controller.clear();
+          }
+          _focusNodes[0].requestFocus();
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          );
+        }
       }
-      _focusNodes[0].requestFocus();
     }
   }
 

@@ -1,0 +1,336 @@
+Now I have a comprehensive understanding of your Ride-Booking-App. Let me provide you with a detailed analysis of the project structure and the APIs you need to implement.
+
+## 📱 Project Overview
+
+**A.R.C Ride Booking App** is a Flutter-based ride-sharing application with two user modules:
+- **Customer App**: Book rides with vehicle selection, real-time tracking, and history
+- **Driver App**: Manage ride requests (currently in early stage)
+
+**Tech Stack:**
+- Frontend: Flutter (Dart)
+- Location Services: Google Maps, Geolocator, Geocoding
+- State Management: SharedPreferences (local storage)
+- HTTP Client: Dio, HTTP package
+- Device Info: Package info, In-app updates
+
+---
+
+## 🔌 API Endpoints You Need to Implement
+
+### **1. AUTHENTICATION APIs**
+
+```
+POST /api/auth/send-otp
+├─ Input: { phoneNumber: string }
+└─ Response: { success: bool, message: string }
+
+POST /api/auth/verify-otp
+├─ Input: { phoneNumber: string, otp: string }
+└─ Response: { success: bool, token: string, user: UserDTO }
+
+POST /api/auth/register
+├─ Input: { phoneNumber: string, name: string, email?: string }
+└─ Response: { success: bool, user: UserDTO, token: string }
+
+GET /api/auth/logout
+└─ Response: { success: bool }
+```
+
+---
+
+2. USER PROFILE APIs**
+
+```
+GET /api/user/profile
+├─ Headers: { Authorization: Bearer token,id: string }
+└─ Response: { user: UserDTO }
+
+PUT /api/user/profile
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { id:number, name?: string, email?: string, profileImage?: string }
+└─ Response: { success: bool, user: UserDTO }
+
+GET /api/user/by-id/:userId
+├─ Headers: { Authorization: Bearer token }
+└─ Response: { user: UserDTO }
+```
+
+---
+
+### **3. VEHICLE & PRICING APIs**
+
+```
+GET /api/vehicles
+├─ Query: { limit?: number, offset?: number }
+└─ Response: { 
+    vehicles: [VehicleDTO],
+    total: number 
+  }
+
+POST /api/fare/calculate
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { 
+    pickupLat: number,
+    pickupLng: number,
+    dropoffLat: number,
+    dropoffLng: number,
+    pickupLocation: string,
+    dropoffLocation: string,
+  }
+└─ Response: {
+    pickupLat: number,
+    pickupLng: number,
+    dropoffLat: number,
+    dropoffLng: number,
+    pickupLocation: string,
+    dropoffLocation: string,
+    perKmCharge: number,
+    distance: number,
+    vehicles: [
+        {
+            vehicleId: string,
+            vehicleType: string,
+            totalFare: number,
+            estimatedTime: string,
+            weightCapacity: String,
+        },
+        {
+             vehicleId: string,
+             vehicleType: string,
+             totalFare: number,
+             estimatedTime: string,
+             weightCapacity: String,
+        }
+    ]
+  }
+
+GET /api/vehicles/available
+├─ Query: { lat: number, lng: number, radius?: number }
+└─ Response: { vehicles: [VehicleDTO] }
+```
+
+---
+
+### **4. BOOKING APIs**
+
+```
+POST /api/bookings/create
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { 
+    vehicleId: string,
+    pickupLocation: string,
+    pickupLat: number,
+    pickupLng: number,
+    dropoffLocation: string,
+    dropoffLat: number,
+    dropoffLng: number,
+    totalFare: number,
+    distance: number
+  }
+└─ Response: { 
+    success: bool,
+    booking: BookingDTO,
+    otp: string 
+  }
+
+GET /api/bookings/:bookingId
+├─ Headers: { Authorization: Bearer token }
+└─ Response: { booking: BookingDTO }
+
+GET /api/bookings/history
+├─ Headers: { Authorization: Bearer token }
+├─ Query: { limit?: number, offset?: number, status?: string }
+└─ Response: {
+    bookings: [BookingDTO],
+    total: number 
+  }
+
+PUT /api/bookings/:bookingId/status
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { status: BookingStatus }
+└─ Response: { success: bool, booking: BookingDTO }
+
+POST /api/bookings/:bookingId/cancel
+├─ Headers: { Authorization: Bearer token }
+└─ Response: { success: bool, message: string }
+
+PUT /api/bookings/:bookingId/rate
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { rating: number, review?: string }
+└─ Response: { success: bool, message: string }
+```
+
+---
+
+### **5. REAL-TIME TRACKING APIs (WebSocket)**
+
+```
+WebSocket Connection:
+wss://api.arcride.com/tracking/:bookingId
+
+Events to Emit:
+├─ driver-location: { lat: number, lng: number, timestamp: number }
+├─ booking-status: { status: BookingStatus, message: string }
+└─ booking-completed: { completedAt: timestamp, message: string }
+
+Events to Receive:
+├─ driver-assigned: { driver: DriverDTO, vehicle: VehicleDTO, eta: string }
+├─ driver-location-update: { lat: number, lng: number }
+└─ ride-started: { startedAt: timestamp }
+```
+
+---
+
+### **6. DRIVER APIS (For Driver App)**
+
+```
+POST /api/driver/register
+├─ Input: { phoneNumber: string, name: string, licenseNumber: string }
+└─ Response: { success: bool, driver: DriverDTO, token: string }
+
+POST /api/driver/accept-ride
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { bookingId: string }
+└─ Response: { success: bool, booking: BookingDTO }
+
+POST /api/driver/reject-ride
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { bookingId: string, reason?: string }
+└─ Response: { success: bool, message: string }
+
+POST /api/driver/update-location
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { lat: number, lng: number }
+└─ Response: { success: bool }
+
+POST /api/driver/complete-ride
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { bookingId: string, dropoffLat: number, dropoffLng: number }
+└─ Response: { success: bool, booking: BookingDTO }
+
+GET /api/driver/available-rides
+├─ Headers: { Authorization: Bearer token }
+├─ Query: { lat: number, lng: number, radius?: number }
+└─ Response: { 
+    bookings: [BookingDTO],
+    total: number 
+  }
+```
+
+---
+
+### **7. OTP VERIFICATION API**
+
+```
+POST /api/booking/verify-pin
+├─ Headers: { Authorization: Bearer token }
+├─ Input: { bookingId: string, pin: string }
+└─ Response: { success: bool, message: string }
+```
+
+---
+
+## 📊 Data Models/DTOs
+
+```dart
+class UserDTO {
+  String id;
+  String name;
+  String phoneNumber;
+  String? profileImage;
+  String? email;
+  DateTime createdAt;
+  DateTime updatedAt;
+}
+
+class VehicleDTO {
+  String id;
+  String type;           // "Auto Rickshaw", "Magic", etc.
+  String description;
+  String? image;
+  double baseFare;
+  double perKmRate;
+  int capacity;
+  String? estimatedTime;
+}
+
+class DriverDTO {
+  String id;
+  String name;
+  String phoneNumber;
+  String licenseNumber;
+  double? rating;
+  String? profileImage;
+  VehicleDTO? assignedVehicle;
+  bool isOnline;
+  DateTime createdAt;
+}
+
+class BookingDTO {
+  String id;
+  String userId;
+  String? driverId;
+  String vehicleId;
+  String pickupLocation;
+  double pickupLat;
+  double pickupLng;
+  String dropoffLocation;
+  double dropoffLat;
+  double dropoffLng;
+  double distance;
+  double totalFare;
+  BookingStatus status;
+  String? otp;
+  DateTime createdAt;
+  DateTime? startedAt;
+  DateTime? completedAt;
+  double? rating;
+  String? review;
+}
+
+enum BookingStatus {
+  pending,
+  assigned,
+  started,
+  completed,
+  cancelled
+}
+```
+
+---
+
+## 📱 Customer App User Journey (What needs API support)
+
+1. **Login Screen** → `POST /auth/send-otp` → `POST /auth/verify-otp`
+2. **Home Screen** → `GET /vehicles` + `GET /bookings/active` (if any)
+3. **Location Selection** → `GET /fare/calculate` + `GET /vehicles/available`
+4. **Vehicle Selection** → Display available vehicles with calculated fares
+5. **Booking Confirmation** → `POST /bookings/create`
+6. **Driver Assigned** → `GET /bookings/:bookingId` + WebSocket connection
+7. **Live Tracking** → WebSocket events for real-time location
+8. **Ride Complete** → `PUT /bookings/:bookingId/rate`
+9. **History Screen** → `GET /bookings/history`
+10. **Profile Screen** → `GET /user/profile` + `PUT /user/profile`
+
+---
+
+## 🏗️ Recommended Backend Architecture
+
+**Framework Suggestions:**
+- **Node.js/Express** - Fast setup, ideal for real-time features
+- **Python/FastAPI** - Clean, async-ready
+- **Java/Spring Boot** - Enterprise-grade, scalable
+- **Go/Gin** - High performance
+
+**Database:**
+- **PostgreSQL** - Relational data (users, bookings, transactions)
+- **Redis** - Real-time tracking, caching, session management
+- **MongoDB** - Flexible document storage if needed
+
+**Real-time:**
+- **Socket.io (Node)** or **WebSockets** for live tracking
+- **Message Queue (RabbitMQ/Kafka)** for async operations
+
+---
+
+Would you like me to help you implement any specific API endpoints? I can create backend code (Node.js, Python, or Java) or help integrate these APIs into your Flutter app!

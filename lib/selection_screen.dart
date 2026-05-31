@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'customer_app/main_customer.dart';
-import 'driver_app/main_driver.dart';
+import 'main.dart';
 
 class SelectionScreen extends StatelessWidget {
   const SelectionScreen({super.key});
@@ -11,17 +10,7 @@ class SelectionScreen extends StatelessWidget {
     await prefs.setString('app_mode', mode);
 
     if (context.mounted) {
-      if (mode == 'customer') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const CustomerApp()),
-        );
-      } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DriverApp()),
-        );
-      }
+      MainEntryApp.restartApp(context);
     }
   }
 
@@ -41,7 +30,6 @@ class SelectionScreen extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-           // logo image
             Container(
               width: 120,
               height: 120,
@@ -49,10 +37,15 @@ class SelectionScreen extends StatelessWidget {
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Image.asset(
-                'assets/logo.png',
+                'assets/images/logo_c.png',
                 fit: BoxFit.contain,
-              ),),
-
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.local_taxi,
+                  size: 80,
+                  color: Colors.white,
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             const Text(
               'A.R.C GO',
@@ -67,20 +60,14 @@ class SelectionScreen extends StatelessWidget {
               context,
               'Login as Customer',
               Icons.person,
-                  // () => _setAppMode(context, 'customer'),
-              // here i want to show massage that this feature is not available for customer
-                  () => ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Customer login is currently unavailable. Please try again later.'),
-                ),
-              ),
+              () => _setAppMode(context, 'customer'),
             ),
             const SizedBox(height: 16),
             _buildSelectionButton(
               context,
               'Login as Driver',
               Icons.drive_eta,
-                  () => _setAppMode(context, 'driver'),
+              () => _setAppMode(context, 'driver'),
             ),
           ],
         ),
@@ -121,4 +108,3 @@ class SelectionScreen extends StatelessWidget {
     );
   }
 }
-

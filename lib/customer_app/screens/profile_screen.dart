@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../utils/constants.dart';
 import '../services/preference_service.dart';
+import '../../main.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -160,7 +161,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () async {
                           await PreferenceService.logout();
                           if (mounted) {
-                            Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
+                            MainEntryApp.restartApp(context);
                           }
                         },
                         child: Container(

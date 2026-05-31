@@ -8,7 +8,13 @@ class PreferenceService {
 
   static Future<void> saveUser(Map<String, dynamic> userData) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userKey, jsonEncode(userData));
+    final currentStr = prefs.getString(_userKey);
+    Map<String, dynamic> mergedData = {};
+    if (currentStr != null) {
+      mergedData = jsonDecode(currentStr);
+    }
+    mergedData.addAll(userData);
+    await prefs.setString(_userKey, jsonEncode(mergedData));
     await prefs.setBool(_isLoggedInKey, true);
   }
 
@@ -28,8 +34,7 @@ class PreferenceService {
 
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userKey);
-    await prefs.setBool(_isLoggedInKey, false);
+    await prefs.clear();
   }
 
   static Future<void> saveRide(Map<String, dynamic> rideData) async {
@@ -44,4 +49,31 @@ class PreferenceService {
     List<String> history = prefs.getStringList(_rideHistoryKey) ?? [];
     return history.map((e) => jsonDecode(e) as Map<String, dynamic>).toList();
   }
+
+  static Future<String?> getAuthToken() async {
+    final user = await getUser();
+    return user?['token'] as String?;
+  }
+
+  static Future<String?> getUserId() async {
+    final user = await getUser();
+    return user?['id']?.toString();
+  }
+
+  static Future<Map<String, String?>> getAuthData() async {
+    final user = await getUser();
+    return {
+      'token': user?['token'] as String?,
+      'id': user?['id']?.toString(),
+    };
+  }
+
+  // how to use getAuthData in api service
+  //   // To get the token for an API header:
+  //     String? token = await PreferenceService.getAuthToken();
+  //
+  //   // To get both ID and Token at once:
+  //     final auth = await PreferenceService.getAuthData();
+  //     print("User ID: ${auth['id']}");
+  //     print("Token: ${auth['token']}");
 }

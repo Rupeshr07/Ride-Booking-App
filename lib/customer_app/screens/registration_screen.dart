@@ -7,6 +7,7 @@ import '../utils/validation_utils.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
 import '../services/preference_service.dart';
+import '../services/auth_service.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({Key? key}) : super(key: key);
@@ -38,24 +39,39 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         _isLoading = true;
       });
 
-      final formData = {
-        'first_name': _firstNameController.text,
-        'last_name': _lastNameController.text,
-        'email': _emailController.text,
-        'gender': selectedGender,
-        'full_name': '${_firstNameController.text} ${_lastNameController.text}',
-      };
+      try {
+        final userData = await PreferenceService.getUser();
+        final phoneNumber = userData?['phoneNumber'] ?? '';
 
-      await PreferenceService.saveUser(formData);
-      
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+        if (phoneNumber.isEmpty) {
+          throw 'Phone number not found. Please log in again.';
+        }
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.pushReplacementNamed(context, '/home');
+        final response = await AuthService.register(
+          phoneNumber: phoneNumber,
+          name: '${_firstNameController.text} ${_lastNameController.text}',
+          email: _emailController.text,
+          gender: selectedGender,
+        );
+
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(response['message'] ?? 'Registration successful')),
+          );
+          Navigator.pushReplacementNamed(context, '/home');
+        }
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+          );
+        }
       }
     }
   }

@@ -6,23 +6,65 @@ import 'driver_app/main_driver.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  final prefs = await SharedPreferences.getInstance();
-  final String? appMode = prefs.getString('app_mode');
-
-  runApp(MainEntryApp(initialMode: appMode));
+  runApp(const MainEntryApp());
 }
 
-class MainEntryApp extends StatelessWidget {
-  final String? initialMode;
+class MainEntryApp extends StatefulWidget {
+  const MainEntryApp({super.key});
 
-  const MainEntryApp({super.key, this.initialMode});
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_MainEntryAppState>()?.restart();
+  }
+
+  @override
+  State<MainEntryApp> createState() => _MainEntryAppState();
+}
+
+class _MainEntryAppState extends State<MainEntryApp> {
+  Key key = UniqueKey();
+  String? _appMode;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAppMode();
+  }
+
+  Future<void> _loadAppMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _appMode = prefs.getString('app_mode');
+      _isLoading = false;
+    });
+  }
+
+  void restart() {
+    setState(() {
+      _isLoading = true;
+      key = UniqueKey();
+    });
+    _loadAppMode();
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (initialMode == 'customer') {
+    if (_isLoading) {
+      return const MaterialApp(
+        home: Scaffold(body: Center(child: CircularProgressIndicator())),
+      );
+    }
+
+    return KeyedSubtree(
+      key: key,
+      child: _buildApp(),
+    );
+  }
+
+  Widget _buildApp() {
+    if (_appMode == 'customer') {
       return const CustomerApp();
-    } else if (initialMode == 'driver') {
+    } else if (_appMode == 'driver') {
       return const DriverApp();
     } else {
       return const MaterialApp(

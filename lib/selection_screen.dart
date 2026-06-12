@@ -60,14 +60,16 @@ class SelectionScreen extends StatelessWidget {
               context,
               'Login as Customer',
               Icons.person,
-              () => _setAppMode(context, 'customer'),
+              // () => _setAppMode(context, 'customer'),
+              () => print('Customer mode selected - login flow not implemented yet')
             ),
             const SizedBox(height: 16),
             _buildSelectionButton(
               context,
               'Login as Driver',
               Icons.drive_eta,
-              () => _setAppMode(context, 'driver'),
+              // () => _setAppMode(context, 'driver'),
+              () => print('Driver mode selected - login flow not implemented yet')
             ),
           ],
         ),

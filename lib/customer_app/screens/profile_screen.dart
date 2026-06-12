@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../utils/constants.dart';
 import '../services/preference_service.dart';
+import '../providers/profile_provider.dart';
 import '../../main.dart';
+import 'edit_profile_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
@@ -11,22 +14,28 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  Map<String, dynamic>? userData;
-  bool isLoading = true;
-
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _loadProfile();
   }
 
-  Future<void> _loadUserData() async {
-    final data = await PreferenceService.getUser();
-    if (mounted) {
-      setState(() {
-        userData = data;
-        isLoading = false;
+  void _loadProfile() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileProvider>().fetchProfile().then((_) {
+        final error = context.read<ProfileProvider>().error;
+        if (error == 'UNAUTHORIZED') {
+          _handleLogout();
+        }
       });
+    });
+  }
+
+  void _handleLogout() async {
+    await PreferenceService.logout();
+    if (mounted) {
+      context.read<ProfileProvider>().clearProfile();
+      MainEntryApp.restartApp(context);
     }
   }
 
@@ -35,9 +44,46 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: SafeArea(
-        child: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : SingleChildScrollView(
+        child: Consumer<ProfileProvider>(
+          builder: (context, profileProvider, child) {
+            if (profileProvider.isLoading && profileProvider.profile == null) {
+              return const Center(child: CircularProgressIndicator());
+            }
+
+            if (profileProvider.error != null && profileProvider.profile == null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 60, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        profileProvider.error!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadProfile,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final user = profileProvider.profile;
+            if (user == null) {
+              return const Center(child: Text('No profile data available'));
+            }
+
+            return RefreshIndicator(
+              onRefresh: () => profileProvider.fetchProfile(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppConstants.p24),
                   child: Column(
@@ -70,28 +116,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     shape: BoxShape.circle,
                                     border: Border.all(color: const Color(0xFFBAE6FD), width: 2),
                                   ),
-                                  child: const CircleAvatar(
+                                  child: CircleAvatar(
                                     backgroundColor: Colors.white,
-                                    child: Icon(Icons.person, size: 50, color: Color(0xFF94A3B8)),
+                                    backgroundImage: user.profileImage != null && user.profileImage!.isNotEmpty
+                                        ? NetworkImage(user.profileImage!)
+                                        : null,
+                                    child: user.profileImage == null || user.profileImage!.isEmpty
+                                        ? const Icon(Icons.person, size: 50, color: Color(0xFF94A3B8))
+                                        : null,
                                   ),
                                 ),
                                 Positioned(
                                   bottom: 0,
                                   right: 0,
-                                  child: Container(
-                                    padding: const EdgeInsets.all(4),
-                                    decoration: const BoxDecoration(
-                                      color: Color(0xFF1E293B),
-                                      shape: BoxShape.circle,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(builder: (context) => const EditProfileScreen()),
+                                      );
+                                    },
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: const BoxDecoration(
+                                        color: Color(0xFF1E293B),
+                                        shape: BoxShape.circle,
+                                      ),
+                                      child: const Icon(Icons.edit, color: Colors.white, size: 14),
                                     ),
-                                    child: const Icon(Icons.edit, color: Colors.white, size: 14),
                                   ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              userData?['full_name'] ?? 'Guest User',
+                              user.name.isEmpty ? 'Guest User' : user.name,
                               style: const TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
@@ -102,10 +161,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
+                                const Icon(Icons.phone, size: 16, color: Color(0xFF64748B)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  user.phoneNumber,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF64748B),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
                                 const Icon(Icons.email_outlined, size: 16, color: Color(0xFF64748B)),
                                 const SizedBox(width: 4),
                                 Text(
-                                  userData?['email'] ?? 'No email provided',
+                                  user.email.isEmpty ? 'No email provided' : user.email,
                                   style: const TextStyle(
                                     fontSize: 14,
                                     color: Color(0xFF64748B),
@@ -117,7 +191,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                _buildBadge((userData?['gender'] ?? 'MALE').toUpperCase(), const Color(0xFFF1F5F9), const Color(0xFF64748B)),
+                                _buildBadge(user.gender.toUpperCase(), const Color(0xFFF1F5F9), const Color(0xFF64748B)),
                                 const SizedBox(width: 12),
                                 _buildBadge('VERIFIED', const Color(0xFFDCFCE7), const Color(0xFF166534), icon: Icons.check_circle),
                               ],
@@ -158,12 +232,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       const SizedBox(height: 24),
                       // Logout Button
                       InkWell(
-                        onTap: () async {
-                          await PreferenceService.logout();
-                          if (mounted) {
-                            MainEntryApp.restartApp(context);
-                          }
-                        },
+                        onTap: _handleLogout,
                         child: Container(
                           width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 16),
@@ -204,6 +273,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -223,7 +295,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(width: 4),
           ],
           Text(
-            label,
+            label.isEmpty ? 'N/A' : label,
             style: TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,

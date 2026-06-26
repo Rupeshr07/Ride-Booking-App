@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
- import '../utils/colors.dart';
+import '../../main.dart';
+import '../utils/colors.dart';
 import '../utils/constants.dart';
  import '../utils/text_styles.dart';
 import '../widgets/custom_button.dart';
@@ -63,74 +64,94 @@ class _OTPScreenState extends State<OTPScreen> {
   String get _otpCode => _controllers.map((e) => e.text).join();
 
   Future<void> _verifyOTP() async {
-    final code = _otpCode;
-    if (code.length < 6) {
-      setState(() {
-        _errorText = "Please enter all 6 digits";
-      });
-      return;
-    }
+    Navigator.pushReplacementNamed(context, '/home');
 
-    setState(() {
-      _isLoading = true;
-      _errorText = null;
-    });
+    // TODO: Implement the actual OTP verification logic here. The following code is commented out for now, but you can uncomment and modify it as needed.
 
-    final String mobileNumber = ModalRoute.of(context)?.settings.arguments as String? ?? "";
-
-    try {
-      await AuthService.verifyOtp(mobileNumber, code);
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        Navigator.pushReplacementNamed(context, '/registration');
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-          _errorText = e.toString();
-        });
-      }
-    }
+    // final code = _otpCode;
+    // if (code.length < 6) {
+    //   setState(() {
+    //     _errorText = "Please enter all 6 digits";
+    //   });
+    //   return;
+    // }
+    //
+    // setState(() {
+    //   _isLoading = true;
+    //   _errorText = null;
+    // });
+    //
+    // final String mobileNumber = ModalRoute.of(context)?.settings.arguments as String? ?? "";
+    //
+    // try {
+    //   final response = await AuthService.verifyOtp(mobileNumber, code);
+    //   if (mounted) {
+    //     setState(() {
+    //       _isLoading = false;
+    //     });
+    //
+    //     // Show success message from API
+    //     ScaffoldMessenger.of(context).showSnackBar(
+    //       SnackBar(
+    //         content: Text(response['message'] ?? 'OTP Verified Successfully'),
+    //         backgroundColor: Colors.green,
+    //       ),
+    //     );
+    //
+    //     // If user is already registered, set app mode permanently
+    //     if (response['user'] != null && response['user']['name'] != null && response['user']['name'].toString().isNotEmpty) {
+    //       MainEntryApp.setAppMode(context, 'customer', permanent: true);
+    //       Navigator.pushReplacementNamed(context, '/home');
+    //     } else {
+    //       Navigator.pushReplacementNamed(context, '/registration');
+    //     }
+    //   }
+    // } catch (e) {
+    //   if (mounted) {
+    //     setState(() {
+    //       _isLoading = false;
+    //       _errorText = e.toString();
+    //     });
+    //   }
+    // }
   }
 
   void _resendOTP() async {
-    if (_canResend) {
-      final String mobileNumber = ModalRoute.of(context)?.settings.arguments as String? ?? "";
-      
-      setState(() {
-        _isLoading = true;
-      });
-
-      try {
-        await AuthService.sendOtp(mobileNumber);
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('OTP resent successfully')),
-          );
-          _startTimer();
-          // Clear fields
-          for (var controller in _controllers) {
-            controller.clear();
-          }
-          _focusNodes[0].requestFocus();
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-          );
-        }
-      }
-    }
+    // TODO: Implement resend OTP logic here. The following code is commented out for now, but you can uncomment and modify it as needed.
+    // if (_canResend) {
+    //   final String mobileNumber = ModalRoute.of(context)?.settings.arguments as String? ?? "";
+    //
+    //   setState(() {
+    //     _isLoading = true;
+    //   });
+    //
+    //   try {
+    //     await AuthService.sendOtp(mobileNumber);
+    //     if (mounted) {
+    //       setState(() {
+    //         _isLoading = false;
+    //       });
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         const SnackBar(content: Text('OTP resent successfully')),
+    //       );
+    //       _startTimer();
+    //       // Clear fields
+    //       for (var controller in _controllers) {
+    //         controller.clear();
+    //       }
+    //       _focusNodes[0].requestFocus();
+    //     }
+    //   } catch (e) {
+    //     if (mounted) {
+    //       setState(() {
+    //         _isLoading = false;
+    //       });
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+    //       );
+    //     }
+    //   }
+    // }
   }
 
   @override

@@ -32,10 +32,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _handleLogout() async {
-    await PreferenceService.logout();
-    if (mounted) {
-      context.read<ProfileProvider>().clearProfile();
-      MainEntryApp.restartApp(context);
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Logout', style: TextStyle(color: Color(0xFF991B1B))),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      await PreferenceService.logout();
+      if (mounted) {
+        context.read<ProfileProvider>().clearProfile();
+        MainEntryApp.restartApp(context);
+      }
     }
   }
 

@@ -10,61 +10,63 @@ class UnloadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Unloading Process'),
+    return SafeArea(
+      child: Scaffold(
         backgroundColor: Colors.white,
-        foregroundColor: DriverColors.textPrimary,
-        elevation: 0,
-      ),
-      body: Consumer<RideProvider>(
-        builder: (context, rideProvider, _) {
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                _buildStatusIcon(rideProvider.status),
-                const SizedBox(height: 32),
-                Text(
-                  _getStatusTitle(rideProvider.status),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _getStatusDescription(rideProvider.status),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: DriverColors.textSecondary),
-                ),
-                const SizedBox(height: 48),
-                if (rideProvider.status == RideStatus.unloadingInProgress)
-                  const LinearProgressIndicator(
-                    backgroundColor: DriverColors.secondary,
-                    color: DriverColors.primary,
-                    minHeight: 10,
+        appBar: AppBar(
+          title: const Text('Unloading Process'),
+          backgroundColor: Colors.white,
+          foregroundColor: DriverColors.textPrimary,
+          elevation: 0,
+        ),
+        body: Consumer<RideProvider>(
+          builder: (context, rideProvider, _) {
+            return Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildStatusIcon(rideProvider.status),
+                  const SizedBox(height: 32),
+                  Text(
+                    _getStatusTitle(rideProvider.status),
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                const Spacer(),
-                if (rideProvider.status == RideStatus.unloadingInProgress)
-                  CustomButton(
-                    text: 'STOP UNLOADING / COMPLETED',
-                    onPressed: () => rideProvider.completeUnloading(),
-                  )
-                else if (rideProvider.status == RideStatus.unloadingCompleted)
-                  CustomButton(
-                    text: 'COMPLETE RIDE',
-                    onPressed: () {
-                      rideProvider.completeRide();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RideCompletionScreen()),
-                      );
-                    },
+                  const SizedBox(height: 12),
+                  Text(
+                    _getStatusDescription(rideProvider.status),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: DriverColors.textSecondary),
                   ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(height: 48),
+                  if (rideProvider.status == RideStatus.unloadingInProgress)
+                    const LinearProgressIndicator(
+                      backgroundColor: DriverColors.secondary,
+                      color: DriverColors.primary,
+                      minHeight: 10,
+                    ),
+                  const Spacer(),
+                  if (rideProvider.status == RideStatus.unloadingInProgress)
+                    CustomButton(
+                      text: 'STOP UNLOADING / COMPLETED',
+                      onPressed: () => rideProvider.completeUnloading(),
+                    )
+                  else if (rideProvider.status == RideStatus.unloadingCompleted)
+                    CustomButton(
+                      text: 'COMPLETE RIDE',
+                      onPressed: () {
+                        rideProvider.completeRide();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RideCompletionScreen()),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

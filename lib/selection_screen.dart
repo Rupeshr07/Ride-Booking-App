@@ -1,17 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 
 class SelectionScreen extends StatelessWidget {
   const SelectionScreen({super.key});
 
-  Future<void> _setAppMode(BuildContext context, String mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('app_mode', mode);
-
-    if (context.mounted) {
-      MainEntryApp.restartApp(context);
-    }
+  void _selectMode(BuildContext context, String mode) {
+    // Only set the UI mode, do not persist to SharedPreferences yet
+    MainEntryApp.setAppMode(context, mode, permanent: false);
   }
 
   @override
@@ -60,14 +55,14 @@ class SelectionScreen extends StatelessWidget {
               context,
               'Login as Customer',
               Icons.person,
-              () => _setAppMode(context, 'customer'),
+              () => _selectMode(context, 'customer'),
             ),
             const SizedBox(height: 16),
             _buildSelectionButton(
               context,
               'Login as Driver',
               Icons.drive_eta,
-              () => _setAppMode(context, 'driver'),
+              () => _selectMode(context, 'driver'),
             ),
           ],
         ),

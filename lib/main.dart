@@ -12,6 +12,10 @@ void main() async {
 class MainEntryApp extends StatefulWidget {
   const MainEntryApp({super.key});
 
+  static void setAppMode(BuildContext context, String? mode, {bool permanent = false}) {
+    context.findAncestorStateOfType<_MainEntryAppState>()?.updateMode(mode, permanent);
+  }
+
   static void restartApp(BuildContext context) {
     context.findAncestorStateOfType<_MainEntryAppState>()?.restart();
   }
@@ -36,6 +40,21 @@ class _MainEntryAppState extends State<MainEntryApp> {
     setState(() {
       _appMode = prefs.getString('app_mode');
       _isLoading = false;
+    });
+  }
+
+  void updateMode(String? mode, bool permanent) async {
+    if (permanent && mode != null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('app_mode', mode);
+    } else if (mode == null) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('app_mode');
+    }
+    
+    setState(() {
+      _appMode = mode;
+      key = UniqueKey();
     });
   }
 

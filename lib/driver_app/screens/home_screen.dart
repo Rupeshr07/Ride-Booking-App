@@ -1,15 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/ride_provider.dart';
+import '../providers/auth_provider.dart';
 import '../utils/colors.dart';
 import '../widgets/ride_request_card.dart';
 import 'pickup_route_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Show login success message when home screen is first loaded
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final auth = context.read<AuthProvider>();
+      if (auth.isAuthenticated) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Driver Login Success!'),
+            backgroundColor: DriverColors.success,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final driver = context.watch<AuthProvider>().driver;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -24,18 +50,18 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
-                  'ARC Driver',
-                  style: TextStyle(
+                  driver?.name ?? 'Driver',
+                  style: const TextStyle(
                     color: DriverColors.textPrimary,
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'ID: DRV-9823',
-                  style: TextStyle(
+                  'ID: ${driver?.id ?? "N/A"}',
+                  style: const TextStyle(
                     color: DriverColors.textSecondary,
                     fontSize: 12,
                   ),

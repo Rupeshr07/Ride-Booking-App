@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../main.dart';
 import '../utils/colors.dart';
 import '../utils/constants.dart';
 
@@ -58,8 +59,15 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           setState(() {
             _isLoading = false;
           });
+          
+          // Set app mode permanently since registration is successful
+          MainEntryApp.setAppMode(context, 'customer', permanent: true);
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response['message'] ?? 'Registration successful')),
+            SnackBar(
+              content: Text(response['message'] ?? 'Registration successful'),
+              backgroundColor: Colors.green,
+            ),
           );
           Navigator.pushReplacementNamed(context, '/home');
         }

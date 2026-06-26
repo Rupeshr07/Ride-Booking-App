@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import 'providers/ride_provider.dart';
+import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/history_screen.dart';
@@ -15,6 +17,7 @@ class DriverApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => RideProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp(
         title: 'ARC Driver',
@@ -31,7 +34,7 @@ class DriverApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
-        initialRoute: '/login',
+        home: const DriverAppInitializer(),
         routes: {
           '/login': (context) => const LoginScreen(),
           '/home': (context) => const HomeScreen(),
@@ -39,6 +42,56 @@ class DriverApp extends StatelessWidget {
           '/profile': (context) => const ProfileScreen(),
         },
       ),
+    );
+  }
+}
+
+class DriverAppInitializer extends StatefulWidget {
+  const DriverAppInitializer({Key? key}) : super(key: key);
+
+  @override
+  State<DriverAppInitializer> createState() => _DriverAppInitializerState();
+}
+
+class _DriverAppInitializerState extends State<DriverAppInitializer> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initAuth();
+    });
+  }
+
+  Future<void> _initAuth() async {
+    final auth = context.read<AuthProvider>();
+    await auth.loadProfile();
+    
+    if (mounted) {
+      final error = auth.error;
+      if (error != null) {
+        // If it's a real error (not just missing token on fresh start), show it
+        if (!error.contains('No token') && !error.contains('Session expired')) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error), backgroundColor: DriverColors.error),
+          );
+        }
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        if (auth.isLoading && auth.driver == null) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+        
+        // If authenticated, show Home. Otherwise, show Login.
+        return auth.isAuthenticated ? const HomeScreen() : const LoginScreen();
+      },
     );
   }
 }

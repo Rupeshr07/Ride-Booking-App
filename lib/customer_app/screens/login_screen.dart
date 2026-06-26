@@ -26,34 +26,37 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+    Navigator.pushNamed(context, '/otp', arguments: _mobileController.text);
 
-      try {
-        final response = await AuthService.sendOtp(_mobileController.text);
-        
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(response['message'] ?? 'OTP sent successfully')),
-          );
-          Navigator.pushNamed(context, '/otp', arguments: _mobileController.text);
-        }
-      } catch (e) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-          );
-        }
-      }
-    }
+    // TODO: Implement the actual login logic here, such as sending OTP to the provided mobile number.
+    // if (_formKey.currentState!.validate()) {
+    //   setState(() {
+    //     _isLoading = true;
+    //   });
+    //
+    //   try {
+    //     final response = await AuthService.sendOtp(_mobileController.text);
+    //
+    //     if (mounted) {
+    //       setState(() {
+    //         _isLoading = false;
+    //       });
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(content: Text(response['message'] ?? 'OTP sent successfully')),
+    //       );
+    //       Navigator.pushNamed(context, '/otp', arguments: _mobileController.text);
+    //     }
+    //   } catch (e) {
+    //     if (mounted) {
+    //       setState(() {
+    //         _isLoading = false;
+    //       });
+    //       ScaffoldMessenger.of(context).showSnackBar(
+    //         SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+    //       );
+    //     }
+    //   }
+    // }
   }
 
   @override

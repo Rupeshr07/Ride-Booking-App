@@ -10,66 +10,68 @@ class LoadingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Loading Process'),
+    return SafeArea(
+      child: Scaffold(
         backgroundColor: Colors.white,
-        foregroundColor: DriverColors.textPrimary,
-        elevation: 0,
-      ),
-      body: Consumer<RideProvider>(
-        builder: (context, rideProvider, _) {
-          return Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                _buildStatusIcon(rideProvider.status),
-                const SizedBox(height: 32),
-                Text(
-                  _getStatusTitle(rideProvider.status),
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  _getStatusDescription(rideProvider.status),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: DriverColors.textSecondary),
-                ),
-                const SizedBox(height: 48),
-                if (rideProvider.status == RideStatus.loadingInProgress)
-                  const LinearProgressIndicator(
-                    backgroundColor: DriverColors.secondary,
-                    color: DriverColors.primary,
-                    minHeight: 10,
+        appBar: AppBar(
+          title: const Text('Loading Process'),
+          backgroundColor: Colors.white,
+          foregroundColor: DriverColors.textPrimary,
+          elevation: 0,
+        ),
+        body: Consumer<RideProvider>(
+          builder: (context, rideProvider, _) {
+            return Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                children: [
+                  const SizedBox(height: 20),
+                  _buildStatusIcon(rideProvider.status),
+                  const SizedBox(height: 32),
+                  Text(
+                    _getStatusTitle(rideProvider.status),
+                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                const Spacer(),
-                if (rideProvider.status == RideStatus.pinVerified)
-                  CustomButton(
-                    text: 'START LOADING',
-                    onPressed: () => rideProvider.startLoading(),
-                  )
-                else if (rideProvider.status == RideStatus.loadingInProgress)
-                  CustomButton(
-                    text: 'STOP LOADING / COMPLETED',
-                    onPressed: () => rideProvider.completeLoading(),
-                  )
-                else if (rideProvider.status == RideStatus.loadingCompleted)
-                  CustomButton(
-                    text: 'START RIDE',
-                    onPressed: () {
-                      rideProvider.startRide();
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RideProgressScreen()),
-                      );
-                    },
+                  const SizedBox(height: 12),
+                  Text(
+                    _getStatusDescription(rideProvider.status),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: DriverColors.textSecondary),
                   ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(height: 48),
+                  if (rideProvider.status == RideStatus.loadingInProgress)
+                    const LinearProgressIndicator(
+                      backgroundColor: DriverColors.secondary,
+                      color: DriverColors.primary,
+                      minHeight: 10,
+                    ),
+                  const Spacer(),
+                  if (rideProvider.status == RideStatus.pinVerified)
+                    CustomButton(
+                      text: 'START LOADING',
+                      onPressed: () => rideProvider.startLoading(),
+                    )
+                  else if (rideProvider.status == RideStatus.loadingInProgress)
+                    CustomButton(
+                      text: 'STOP LOADING / COMPLETED',
+                      onPressed: () => rideProvider.completeLoading(),
+                    )
+                  else if (rideProvider.status == RideStatus.loadingCompleted)
+                    CustomButton(
+                      text: 'START RIDE',
+                      onPressed: () {
+                        rideProvider.startRide();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RideProgressScreen()),
+                        );
+                      },
+                    ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

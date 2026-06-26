@@ -8,56 +8,58 @@ class RideCompletionScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text('Trip Summary'),
-        automaticallyImplyLeading: false,
+    return SafeArea(
+      child: Scaffold(
         backgroundColor: Colors.white,
-        foregroundColor: DriverColors.textPrimary,
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: DriverColors.secondary.withOpacity(0.3),
-                borderRadius: BorderRadius.circular(20),
+        appBar: AppBar(
+          title: const Text('Trip Summary'),
+          automaticallyImplyLeading: false,
+          backgroundColor: Colors.white,
+          foregroundColor: DriverColors.textPrimary,
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(24),
+                decoration: BoxDecoration(
+                  color: DriverColors.secondary.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Column(
+                  children: [
+                    const Text(
+                      'Total Fare',
+                      style: TextStyle(fontSize: 16, color: DriverColors.textSecondary),
+                    ),
+                    const Text(
+                      '\$125.00',
+                      style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: DriverColors.primary),
+                    ),
+                    const Divider(height: 32),
+                    _buildSummaryRow(Icons.route, 'Total Distance', '15.2 km'),
+                    _buildSummaryRow(Icons.timer, 'Trip Duration', '42 min'),
+                    _buildSummaryRow(Icons.inventory_2, 'Loading Time', '15 min'),
+                    _buildSummaryRow(Icons.local_shipping, 'Unloading Time', '10 min'),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  const Text(
-                    'Total Fare',
-                    style: TextStyle(fontSize: 16, color: DriverColors.textSecondary),
-                  ),
-                  const Text(
-                    '\$125.00',
-                    style: TextStyle(fontSize: 36, fontWeight: FontWeight.bold, color: DriverColors.primary),
-                  ),
-                  const Divider(height: 32),
-                  _buildSummaryRow(Icons.route, 'Total Distance', '15.2 km'),
-                  _buildSummaryRow(Icons.timer, 'Trip Duration', '42 min'),
-                  _buildSummaryRow(Icons.inventory_2, 'Loading Time', '15 min'),
-                  _buildSummaryRow(Icons.local_shipping, 'Unloading Time', '10 min'),
-                ],
+              const SizedBox(height: 32),
+              _buildLocationTimeline(),
+              const SizedBox(height: 48),
+              CustomButton(
+                text: 'COLLECT PAYMENT',
+                onPressed: () {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const PaymentScreen()),
+                  );
+                },
               ),
-            ),
-            const SizedBox(height: 32),
-            _buildLocationTimeline(),
-            const SizedBox(height: 48),
-            CustomButton(
-              text: 'COLLECT PAYMENT',
-              onPressed: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PaymentScreen()),
-                );
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

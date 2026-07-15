@@ -76,6 +76,7 @@ POST /api/fare/calculate
     dropoffLng: number,
     pickupLocation: string,
     dropoffLocation: string,
+
   }
 └─ Response: {
     pickupLat: number,
@@ -116,7 +117,9 @@ GET /api/vehicles/available
 ```
 POST /api/bookings/create
 ├─ Headers: { Authorization: Bearer token }
-├─ Input: { 
+├─ Input: {.
+
+    loadType: string,
     vehicleId: string,
     pickupLocation: string,
     pickupLat: number,
@@ -125,7 +128,8 @@ POST /api/bookings/create
     dropoffLat: number,
     dropoffLng: number,
     totalFare: number,
-    distance: number
+    distance: number,
+
   }
 └─ Response: { 
     success: bool,

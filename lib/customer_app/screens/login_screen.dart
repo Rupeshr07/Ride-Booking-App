@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
- import '../utils/colors.dart';
+import '../utils/colors.dart';
 import '../utils/constants.dart';
-  import '../utils/text_styles.dart';
+import '../utils/text_styles.dart';
 import '../utils/validation_utils.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_textfield.dart';
 import '../services/auth_service.dart';
+import '../../main.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -28,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _handleLogin() async {
     Navigator.pushNamed(context, '/otp', arguments: _mobileController.text);
 
-    // TODO: Implement the actual login logic here, such as sending OTP to the provided mobile number.
     // if (_formKey.currentState!.validate()) {
     //   setState(() {
     //     _isLoading = true;
@@ -42,7 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
     //         _isLoading = false;
     //       });
     //       ScaffoldMessenger.of(context).showSnackBar(
-    //         SnackBar(content: Text(response['message'] ?? 'OTP sent successfully')),
+    //         SnackBar(
+    //           content: Text(response['message'] ?? 'OTP sent successfully'),
+    //           backgroundColor: Colors.green,
+    //         ),
     //       );
     //       Navigator.pushNamed(context, '/otp', arguments: _mobileController.text);
     //     }
@@ -62,88 +65,139 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            height: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top,
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.p24),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 2),
-                  // Logo Placeholder
-                  Container(
-                    width: 120,
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceAlternative,
-                      borderRadius: BorderRadius.circular(AppConstants.r24),
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.location_on, size: 48, color: AppColors.primary),
-                        Text(
-                          'A.R.C',
-                          style: TextStyle(
-                            color: AppColors.primary,
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.p32),
-                  const Text(
-                    'Login with Mobile Number',
-                    style: AppTextStyles.h4,
-                  ),
-                  const SizedBox(height: AppConstants.p32),
-                  CustomTextField(
-                    controller: _mobileController,
-                    hintText: 'Enter phone number',
-                    keyboardType: TextInputType.phone,
-                    validator: ValidationUtils.validateMobile,
-                    prefix: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Text('+91', style: AppTextStyles.bodyLarge),
-                        const SizedBox(width: AppConstants.p8),
-                        Container(
-                          width: 1,
-                          height: 24,
-                          color: AppColors.divider,
-                        ),
-                        const SizedBox(width: AppConstants.p8),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: AppConstants.p24),
-                  CustomButton(
-                    text: 'Send OTP',
-                    icon: Icons.arrow_forward,
-                    isLoading: _isLoading,
-                    onPressed: _handleLogin,
-                  ),
-                  const Spacer(flex: 3),
-                  const Column(
-                    children: [
-                      Icon(Icons.devices, size: 24, color: AppColors.textTertiary),
-                      SizedBox(height: AppConstants.p4),
-                      Text('Version 1.0.0', style: AppTextStyles.labelSmall),
-                    ],
-                  ),
-                  const SizedBox(height: AppConstants.p16),
-                ],
+      backgroundColor: const Color(0xFFF1F5F9),
+      body: Stack(
+        children: [
+          // Background Image
+          Positioned(
+            top: 25,
+            left: 0,
+            right: 0,
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 14.0),
+              child: Image.asset(
+                'assets/images/selection_bg.png',
+                fit: BoxFit.cover,
+                height: MediaQuery.of(context).size.height * 0.6,
+                alignment: Alignment.topCenter,
               ),
             ),
           ),
-        ),
+          
+          // Back Button
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Color(0xFF0D2C54)),
+              onPressed: () {
+                MainEntryApp.setAppMode(context, null);
+              },
+            ),
+          ),
+
+          // White Card
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.53,
+              margin: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 20,
+                    offset: Offset(0, -5),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Image.asset(
+                      'assets/images/logo_arc.png',
+                      height: 32,
+                      errorBuilder: (context, error, stackTrace) =>
+                      const Icon(Icons.location_on, color: Color(0xFF0D2C54), size: 32),
+                    ),
+                    // Header
+
+                    const SizedBox(height: 18),
+                    const Text(
+                      'Welcome Back!',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Enter your mobile number to receive \na verification code',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF64748B),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 26),
+
+                    CustomTextField(
+                      controller: _mobileController,
+                      hintText: 'Enter phone number',
+                      keyboardType: TextInputType.phone,
+                      validator: ValidationUtils.validateMobile,
+                      prefix: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text('+91', style: AppTextStyles.bodyLarge),
+                          const SizedBox(width: AppConstants.p8),
+                          Container(
+                            width: 1,
+                            height: 24,
+                            color: AppColors.divider,
+                          ),
+                          const SizedBox(width: AppConstants.p8),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    
+                    // Button
+                    CustomButton(
+                      text: 'SEND OTP',
+                      isLoading: _isLoading,
+                      onPressed: _handleLogin,
+                    ),
+                    
+                    const Spacer(),
+                    
+                    // Version info
+                    const Center(
+                      child: Text(
+                        'A.R.C. VERSION 1.0.0',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Color(0xFF94A3B8),
+                          letterSpacing: 1,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

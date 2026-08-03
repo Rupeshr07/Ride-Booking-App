@@ -66,105 +66,138 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: DriverColors.primary),
-          onPressed: () {
-            // Return to selection screen by clearing the temp mode
-            MainEntryApp.setAppMode(context, null);
-          },
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
+      body: Stack(
+        children: [
+          // Background Image
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/images/selection_bg.png',
+              fit: BoxFit.cover,
+              height: MediaQuery.of(context).size.height * 0.45,
+              alignment: Alignment.topCenter,
+            ),
+          ),
+          
+          // Back Button
+          Positioned(
+            top: 40,
+            left: 16,
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back, color: Color(0xFF2E7D32)),
+              onPressed: () {
+                MainEntryApp.setAppMode(context, null);
+              },
+            ),
+          ),
+
+          // White Card
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              height: MediaQuery.of(context).size.height * 0.65,
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(32),
+                  topRight: Radius.circular(32),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 20,
+                    offset: Offset(0, -5),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 32, 24, 24),
+              child: SingleChildScrollView(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: DriverColors.primary,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Icon(
-                        Icons.local_shipping,
-                        color: Colors.white,
-                        size: 40,
+                    // Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.drive_eta, color: Color(0xFF2E7D32), size: 32),
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Driver Login',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF2E7D32),
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 32),
+                    const Text(
+                      'Welcome Back!',
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1E293B),
                       ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 8),
                     const Text(
-                      'ARC Driver',
+                      'Please sign in to your driver account\nto start managing deliveries',
                       style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: DriverColors.primary,
+                        fontSize: 14,
+                        color: Color(0xFF64748B),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Input Fields
+                    CustomTextField(
+                      controller: _mobileController,
+                      label: 'MOBILE NUMBER',
+                      hint: '9834796738',
+                      icon: Icons.phone,
+                      keyboardType: TextInputType.phone,
+                    ),
+                    const SizedBox(height: 20),
+                    CustomTextField(
+                      controller: _passwordController,
+                      label: 'PASSWORD',
+                      hint: '********',
+                      icon: Icons.lock,
+                      isPassword: true,
+                    ),
+                    const SizedBox(height: 32),
+                    
+                    // Button
+                    Consumer<AuthProvider>(
+                      builder: (context, auth, _) => CustomButton(
+                        text: 'LOGIN',
+                        isLoading: auth.isLoading,
+                        onPressed: _handleLogin,
+                        color: const Color(0xFF2E7D32),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
+                      child: TextButton(
+                        onPressed: () {},
+                        child: const Text(
+                          'Need help? Contact Support',
+                          style: TextStyle(color: Color(0xFF2E7D32)),
+                        ),
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 40),
-              const Text(
-                'Welcome Back',
-                style: TextStyle(
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                  color: DriverColors.textPrimary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                'Please sign in to your driver account',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: DriverColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 29),
-              CustomTextField(
-                controller: _mobileController,
-                label: 'Mobile Number',
-                hint: '000 000 0000',
-                icon: Icons.phone,
-                keyboardType: TextInputType.phone,
-              ),
-              const SizedBox(height: 18),
-              CustomTextField(
-                controller: _passwordController,
-                label: 'Password',
-                hint: '********',
-                icon: Icons.lock,
-                isPassword: true,
-              ),
-              const SizedBox(height: 29),
-              Consumer<AuthProvider>(
-                builder: (context, auth, _) => CustomButton(
-                  text: 'Login',
-                  isLoading: auth.isLoading,
-                  onPressed: _handleLogin,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Center(
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text(
-                    'Need help? Contact Support',
-                    style: TextStyle(color: DriverColors.primary),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
